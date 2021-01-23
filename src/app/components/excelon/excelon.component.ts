@@ -1,5 +1,6 @@
 import { stringify } from '@angular/compiler/src/util';
 import { Component, OnInit } from '@angular/core';
+import { CalcService } from 'src/app/services/calc.service';
 
 @Component({
   selector: 'app-excelon',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./excelon.component.scss']
 })
 export class ExcelonComponent implements OnInit {
-  constructor() { } 
+  constructor(public calc:CalcService) { } 
   public arr=[
     '', '', '', '', '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '', '', '', '', '',
@@ -23,12 +24,27 @@ export class ExcelonComponent implements OnInit {
   ngOnInit(): void {
   }
   public dapan: string="";
-  
-  infixToPostFix1(TestString: String) {
+  public catch(event:any){
+    let a= /^\s*([-+]?)(\d+)(?:\s*([-+*\/])\s*((?:\s[-+])?\d+)\s*)+$/;
+    if(a.test(event)){
+      let a=this.infixToPostFix1(event);
+      return a;
+    }else
+    {
+      let b=event;
+      this.dapan=b;
+      return b;
+      }
 
+  }
+  public infixToPostFix1(TestString: any) {
+    
     this.dapan = this.readInput(TestString);
+    
+    TestString= this.dapan;
+  
 
-    return  this.dapan;
+    return  TestString;
   }
 
    public readInput(input){
@@ -52,62 +68,15 @@ export class ExcelonComponent implements OnInit {
         }
         stack.pop();
       }else { 
-      operatorCheck(stack,input[i],answer)
+      this.calc.operatorCheck(stack,input[i],answer)
     }
     }
     while(stack.length!=0){
       answer.push(stack.pop());
     }
-    console.log(answer);
-    console.log("stack:" +stack)
-    console.log(executePostfix(answer));
-
-    return executePostfix(answer);
+  
+    return this.calc.executePostfix(answer);
 
   }
   
 }
-
-    function executePostfix(arr=[]) {
-      let stack = [], operand1, operand2, tempOperand;
-      let operators = ['+', '-', '*', '/'];
-      for (let i = 0; i<arr.length;i++) {
-        // char = str.charAt(i);
-        console.log("dau"+operators.indexOf(arr[i]));
-        if (operators.indexOf(arr[i]) >= 0) {
-          // operate
-          operand2 = stack.pop();
-          operand1 = stack.pop();
-          tempOperand = eval(operand1 + arr[i] + operand2);
-          stack.push(tempOperand);
-        } else {
-          stack.push(arr[i]);
-          console.log(stack)
-        }
-      }
-      return stack.pop();
-    }
-
-    function operatorCheck(stack=[],x:string,answer=[]){
-      if (stack.length == 0) {
-        stack.push(x);
-      }else if (operands(x) > operands(stack[stack.length-1])) {
-        stack.push(x);   
-      }else{
-        while(operands(x) <= operands(stack[stack.length-1]) && stack.length!=0 && stack[stack.length-1]!='('){
-          answer.push(stack.pop());
-        }
-        stack.push(x);
-      }
-    }
-    function operands(x:string){
-      if (x == "(") {
-        return 3;
-      }
-      if (x == "*" || x == "/") {
-        return 2;
-      }else if (x == "+" || x == "-") {
-        return 1;
-      }
-    }
-  
